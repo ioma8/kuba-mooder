@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/synaptic/1.1.4/synaptic.js"></script>
+</head>
+
+<body>
+
+    <script>
+        window.onload = function () {
+            var Neuron = synaptic.Neuron,
+                Layer = synaptic.Layer,
+                Network = synaptic.Network,
+                Trainer = synaptic.Trainer,
+                Architect = synaptic.Architect;
+            var myNetwork = new Architect.Perceptron(3, 3, 4);
+            // otot nahráno na mooder.gallia.cz
+            // helf: https://github.com/cazala/synaptic/wiki/Networks#activate // pro jednotlive uceni se pouzije f-ce propagate
+            // vstupy: 
+            // unava, nestastnost, nervozita
+            // vystupy:
+            // dat si kafe, dat si prochazku, dat si cbt, dat si tabak
+            var trainer = new Trainer(myNetwork)
+            var trainingSet = [{
+                    input: [1, 0, 0],
+                    output: [1, 0, 1, 0]
+                },
+                {
+                    input: [0, 1, 0],
+                    output: [0, 0, 1, 1]
+                },
+                {
+                    input: [0, 0, 1],
+                    output: [0, 1, 0, 1]
+                },
+                {
+                    input: [0, 0, 0],
+                    output: [0, 0, 0, 0]
+                },
+                {
+                    input: [0.5, 0, 0.5],
+                    output: [0.8, 0.3, 0.3, 0]
+                },
+            ]
+
+            trainer.train(trainingSet, {
+                rate: .5,
+                iterations: 2000,
+                error: .1,
+                shuffle: true,
+                cost: Trainer.cost.CROSS_ENTROPY,
+            });
+
+            document.getElementById('calculate').onclick = function () {
+                var values = [parseInt(document.getElementById('unava').value) / 100,
+                    parseInt(document.getElementById('nestastnost').value) / 100, parseInt(document.getElementById(
+                        'nervozita').value) / 100
+                ];
+                var results = myNetwork.activate(values);
+                var resultsNazvy = [];
+                resultsNazvy[0] = 'Dát si kafe';
+                resultsNazvy[1] = 'Dát si procházku';
+                resultsNazvy[2] = 'Udělat si CBT';
+                resultsNazvy[3] = 'Dát si šňupací tabák';
+                var resultsText = '';
+                for (var i = 0; i < results.length; i++) {
+                    if (results[i] > 0.65) {
+                        resultsText += '<b>' + resultsNazvy[i] + '</b> ' + parseInt(results[i] * 100) +
+                            '%<br/>';
+                    }
+                }
+                document.getElementById('vysledky').innerHTML = resultsText;
+            };
+
+        };
+    </script>
+
+    <table>
+        <tr>
+            <td>Únava:</td>
+            <td>Nešťastnost</td>
+            <td>Nervozita</td>
+        </tr>
+        <tr>
+            <td>
+                <input id="unava" size="1" value="0" />
+            </td>
+            <td>
+                <input id="nestastnost" size="1" value="0" />
+            </td>
+            <td>
+                <input id="nervozita" size="1" value="0" />
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <button type="button" id="calculate">Calculate</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Udělat:
+            </td>
+            <td colspan="2">
+                <span id="vysledky"></span>
+            </td>
+        </tr>
+    </table>
+
+</body>
+
+</html>
